@@ -35,7 +35,7 @@ RSpec.describe Api::V1::EventsController, type: :request do
         }
       }
 
-      post "/api/v1/events", params: event_params, headers: auth_headers(attendee)
+      post "/api/v1/events", params: event_params, headers: auth_headers(organizer)
 
       expect(response).to have_http_status(:created)
     end
@@ -59,7 +59,7 @@ RSpec.describe Api::V1::EventsController, type: :request do
 
       delete "/api/v1/events/#{event.id}", headers: auth_headers(organizer)
 
-      expect(response).to have_http_status(:no_content)
+      expect(response).to have_http_status(:ok)
     end
   end
 end

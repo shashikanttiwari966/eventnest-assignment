@@ -51,7 +51,8 @@ class Order < ApplicationRecord
   end
 
   def send_confirmation_email
-    UserMailer.order_confirmation(user, self).deliver_now
+    # Fix: Replace deliver_now with deliver_later to hand off to Sidekiq 
+    UserMailer.order_confirmation(user, self).deliver_later
   end
 
   def track_analytics
@@ -59,12 +60,13 @@ class Order < ApplicationRecord
   end
 
   def handle_status_change
+    # Fix: Replace deliver_now with deliver_later to hand off to Sidekiq 
     if status_previously_changed?
       case status
       when "cancelled"
-        UserMailer.order_cancelled(user, self).deliver_now
+        UserMailer.order_cancelled(user, self).deliver_later
       when "confirmed"
-        UserMailer.order_confirmed(user, self).deliver_now
+        UserMailer.order_confirmed(user, self).deliver_later
       end
     end
   end

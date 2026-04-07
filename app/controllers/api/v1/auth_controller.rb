@@ -32,7 +32,8 @@ module Api
       private
 
       def register_params
-        params.permit(:name, :email, :password, :password_confirmation, :role, :phone)
+        # Fix: Remove :role from permitted params. New users should always default to attendee
+        params.permit(:name, :email, :password, :password_confirmation, :phone)
       end
     end
   end

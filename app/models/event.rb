@@ -46,7 +46,8 @@ class Event < ApplicationRecord
   end
 
   def send_organizer_confirmation
-    UserMailer.event_created(user, self).deliver_now
+    # Fix: Replace deliver_now with deliver_later to hand off to Sidekiq 
+    UserMailer.event_created(user, self).deliver_later
   end
 
   def publish!

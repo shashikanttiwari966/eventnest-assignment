@@ -7,6 +7,8 @@ Rails.application.routes.draw do
       resources :events do
         resources :ticket_tiers, only: [:index, :create, :update, :destroy]
       end
+      
+      resources :bookmarks, only: [:index, :create, :destroy]
 
       resources :orders, only: [:index, :show, :create] do
         member do

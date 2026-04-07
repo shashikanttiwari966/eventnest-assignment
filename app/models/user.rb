@@ -4,6 +4,9 @@ class User < ApplicationRecord
   has_many :events
   has_many :orders
 
+  has_many :bookmarks, dependent: :destroy
+  has_many :bookmarked_events, through: :bookmarks, source: :event
+
   validates :email, presence: true, uniqueness: true
   validates :name, presence: true
   validates :role, inclusion: { in: %w[organizer attendee admin] }

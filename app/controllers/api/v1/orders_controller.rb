@@ -1,9 +1,10 @@
 module Api
   module V1
     class OrdersController < ApplicationController
+      before_action :find_order, only: [:show, :cancel]
 
       def index
-        orders = Order.all.order(created_at: :desc)
+        orders = current_user.orders.order(created_at: :desc)
 
         render json: orders.map { |order|
           {
@@ -19,19 +20,17 @@ module Api
       end
 
       def show
-        order = Order.find(params[:id])
-
         render json: {
-          id: order.id,
-          confirmation_number: order.confirmation_number,
-          status: order.status,
-          total_amount: order.total_amount.to_f,
+          id: @order.id,
+          confirmation_number: @order.confirmation_number,
+          status: @order.status,
+          total_amount: @order.total_amount.to_f,
           event: {
-            id: order.event.id,
-            title: order.event.title,
-            starts_at: order.event.starts_at
+            id: @order.event.id,
+            title: @order.event.title,
+            starts_at: @order.event.starts_at
           },
-          items: order.order_items.map { |item|
+          items: @order.order_items.map { |item|
             {
               ticket_tier: item.ticket_tier.name,
               quantity: item.quantity,
@@ -39,9 +38,9 @@ module Api
               subtotal: item.subtotal.to_f
             }
           },
-          payment: order.payment ? {
-            status: order.payment.status,
-            provider_reference: order.payment.provider_reference
+          payment: @order.payment ? {
+            status: @order.payment.status,
+            provider_reference: @order.payment.provider_reference
           } : nil
         }
       end
@@ -78,14 +77,21 @@ module Api
       end
 
       def cancel
-        order = Order.find(params[:id])
-
-        if order.status == "confirmed" || order.status == "pending"
-          order.cancel!
-          render json: { message: "Order cancelled", status: order.status }
+        if @order.status == "confirmed" || @order.status == "pending"
+          @order.cancel!
+          render json: { message: "Order cancelled", status: @order.status }
         else
-          render json: { error: "Cannot cancel order in #{order.status} status" }, status: :unprocessable_entity
+          render json: { error: "Cannot cancel order in #{@order.status} status" }, status: :unprocessable_entity
         end
+      end
+
+      private
+
+      # Fix: Scope all order queries through current_user.orders
+      def find_order
+        @order = current_user.orders.find(params[:id])
+      rescue ActiveRecord::RecordNotFound
+        render json: { errors: [{ message: "Order not found" }] }, status: :not_found
       end
     end
   end

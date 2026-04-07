@@ -15,11 +15,13 @@ class TicketTier < ApplicationRecord
   end
 
   def reserve_tickets!(count)
-    if available_quantity >= count
-      self.sold_count += count
-      save!
-    else
-      raise "Not enough tickets available"
+    # Fix: Use with_lock to acquire a row-level exclusive lock for the duration of the check-and-update
+    with_lock do
+      if available_quantity >= count
+        update_columns(sold_count: sold_count + count)
+      else
+        raise "Not enough tickets available"
+      end
     end
   end
 end
