@@ -4,10 +4,17 @@ module Api
       skip_before_action :authenticate_user!, only: [:index, :show]
 
       def index
-        events = Event.published.upcoming
+        events = Event.published.upcoming.includes(:user, :ticket_tiers)
 
         if params[:search].present?
-          events = events.where("title LIKE '%#{params[:search]}%' OR description LIKE '%#{params[:search]}%'")
+          # FIX: Use parameterized query to prevent SQL injection.
+          # Previously: events.where("title LIKE '%#{params[:search]}%'")
+          # That allowed attackers to inject arbitrary SQL via the search param.
+          search_term = "%#{params[:search]}%"
+          events = events.where(
+            "title LIKE :search OR description LIKE :search",
+            search: search_term
+          )
         end
 
         if params[:category].present?
@@ -18,7 +25,10 @@ module Api
           events = events.where(city: params[:city])
         end
 
-        events = events.order(params[:sort_by] || "starts_at ASC")
+        # FIX: Whitelist sort_by column to prevent SQL injection via order clause.
+        allowed_sort = %w[starts_at ends_at title created_at]
+        sort_column = allowed_sort.include?(params[:sort_by]) ? params[:sort_by] : "starts_at"
+        events = events.order("#{sort_column} ASC")
 
         render json: events.map { |event|
           {
