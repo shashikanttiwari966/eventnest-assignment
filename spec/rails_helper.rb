@@ -10,10 +10,18 @@ require "shoulda/matchers"
 Dir[Rails.root.join("spec", "support", "**", "*.rb")].sort.each { |f| require f }
 
 RSpec.configure do |config|
+  # FIX: Use ActiveJob test helpers to avoid external Redis calls in specs.
+  config.include ActiveJob::TestHelper
+
   config.fixture_paths = [Rails.root.join("spec/fixtures")]
   config.use_transactional_fixtures = true
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
+
+  # FIX: Add valid HOST header to request specs to avoid ActionDispatch::HostAuthorization blocking.
+  config.before(:each, type: :request) do
+    host! "localhost"
+  end
 end
 
 Shoulda::Matchers.configure do |config|
