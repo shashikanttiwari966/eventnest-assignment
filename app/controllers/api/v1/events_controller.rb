@@ -2,6 +2,7 @@ module Api
   module V1
     class EventsController < ApplicationController
       skip_before_action :authenticate_user!, only: [:index, :show]
+      before_action :set_current_user_optional, only: [:show]
       before_action :find_event, only: [:update, :destroy]
 
       def index

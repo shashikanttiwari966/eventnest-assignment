@@ -133,8 +133,6 @@ curl -s -X POST http://localhost:3000/api/v1/auth/register \
 ---
 
 ## 7. Bookmark Feature Demo
-
-### Register a fresh attendee:
 ```bash
 TOKEN_C=$(curl -s -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -151,14 +149,14 @@ echo "Event ID: $EVENT_ID"
 
 ## Create a Bookmark (Attendee)
 curl -X POST http://localhost:3000/api/v1/bookmarks \
-     -H "Authorization: Bearer $TOKEN_A" \
-     -H "Content-Type: application/json" \
-     -d '{"event_id": $EVENT_ID}'
+  -H "Authorization: Bearer $TOKEN_A" \
+  -H "Content-Type: application/json" \
+  -d "{\"event_id\": $EVENT_ID}"
 
 # Response: {"message":"Event bookmarked successfully"}
 
 ## View Event with Count (Organizer Only)
-curl -X GET http://localhost:3000/api/v1/events/1 \
+curl -X GET http://localhost:3000/api/v1/events/$EVENT_ID \
      -H "Authorization: Bearer $TOKEN_C"
 
 # Response: {
@@ -176,7 +174,7 @@ curl -X POST http://localhost:3000/api/v1/bookmarks \
      -d '{"event_id": $EVENT_ID}'
 
 # Response: 422 Unprocessable Entity
-# { "errors": ["User already bookmarked this event"] }
+# {"errors":["User already bookmarked this event"]}
 
 ## List My Bookmarks
 curl -X GET http://localhost:3000/api/v1/bookmarks \
@@ -186,7 +184,7 @@ curl -X GET http://localhost:3000/api/v1/bookmarks \
 # [ { "id": 1, "title": "Ruby on Rails Workshop", ... } ]
 
 ## Remove Bookmark (Here id is event Id)
-curl -X DELETE http://localhost:3000/api/v1/bookmarks/1 \
+curl -X DELETE http://localhost:3000/api/v1/bookmarks/$EVENT_ID \
      -H "Authorization: Bearer <YOUR_TOKEN>" \
      -H "Content-Type: application/json"
 

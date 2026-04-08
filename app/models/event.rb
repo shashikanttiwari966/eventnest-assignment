@@ -3,6 +3,8 @@ class Event < ApplicationRecord
   has_many :ticket_tiers, dependent: :destroy
   has_many :orders
 
+  has_many :bookmarks
+
   validates :title, presence: true
 
   scope :published, -> { where(status: "published") }

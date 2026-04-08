@@ -15,6 +15,20 @@ class ApplicationController < ActionController::API
     end
   end
 
+  def set_current_user_optional
+    header = request.headers["Authorization"]
+    token = header&.split(" ")&.last
+
+    return unless token.present?
+
+    begin
+      decoded = JWT.decode(token, Rails.application.secret_key_base)[0]
+      @current_user = User.find_by(id: decoded["user_id"])
+    rescue
+      @current_user = nil
+    end
+  end
+
   def current_user
     @current_user
   end
